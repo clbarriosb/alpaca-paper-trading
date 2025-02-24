@@ -40,6 +40,7 @@ async def get_account():
 @app.post("/order")
 async def create_order(order_request: OrderRequest):
     try:
+        return {"message":"order"}
         market_order_data = MarketOrderRequest(
             symbol=order_request.symbol,
             qty=order_request.quantity,
@@ -59,7 +60,7 @@ async def create_order(order_request: OrderRequest):
 @app.get("/test")
 async def test_endpoint():
     print("test")
-    return {"message":"test"}
+    return {"message":"test url"}
 
 # Fix the main block to properly run the server
 
