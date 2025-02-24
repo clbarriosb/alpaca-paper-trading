@@ -12,7 +12,7 @@ load_dotenv()
 
 # Initialize FastAPI app
 
-app = FastAPI(title="Alpaca Trading API")
+app = FastAPI()
 
 # Configure Alpaca credentials
 alpaca_api = os.getenv("ALPACA_API_KEY")

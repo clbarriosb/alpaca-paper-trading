@@ -1,5 +1,6 @@
 fastapi
 uvicorn
 python-dotenv
-alpaca-trade-api
+alpaca-py
 requests
+pydantic
