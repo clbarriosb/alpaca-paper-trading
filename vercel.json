@@ -2,22 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "paperTrading.py",
+      "src": "api/index.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
-      "src": "/docs",
-      "dest": "paperTrading.py"
-    },
-    {
-      "src": "/openapi.json",
-      "dest": "paper-trading.py"
-    },
-    {
       "src": "/(.*)",
-      "dest": "paperTrading.py"
+      "dest": "/api/index.py"
     }
   ]
 }
