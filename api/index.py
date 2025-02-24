@@ -40,7 +40,7 @@ async def get_account():
 @app.post("/order")
 async def create_order(order_request: OrderRequest):
     try:
-        return {"message":"order"}
+        print("order_request: ", order_request)
         market_order_data = MarketOrderRequest(
             symbol=order_request.symbol,
             qty=order_request.quantity,
