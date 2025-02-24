@@ -39,7 +39,7 @@ async def get_account():
 
 @app.post("/order")
 async def create_order(order_request: OrderRequest):
-    return {"orders":order_request}
+    return {"orders":"order_request"}
     try:
         print("order_request: ", order_request)
         return {"orders":order_request}
