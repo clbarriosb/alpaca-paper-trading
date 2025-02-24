@@ -41,6 +41,7 @@ async def get_account():
 async def create_order(order_request: OrderRequest):
     try:
         print("order_request: ", order_request)
+        return {"orders":order_request}
         market_order_data = MarketOrderRequest(
             symbol=order_request.symbol,
             qty=order_request.quantity,
