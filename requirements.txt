@@ -2,3 +2,5 @@ fastapi
 uvicorn
 alpaca-py
 pydantic
+python-dotenv
+requests

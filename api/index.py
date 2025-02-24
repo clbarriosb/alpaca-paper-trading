@@ -26,7 +26,8 @@ class OrderRequest(BaseModel):
 
 @app.get("/account")
 async def get_account():
-
+    print("alpaca_api: ", alpaca_api)
+    print("alpaca_secret: ", alpaca_secret)
     url = "https://paper-api.alpaca.markets/v2/account"
     headers = {
         "accept": "application/json",
@@ -60,6 +61,6 @@ async def test_endpoint():
 
 # Fix the main block to properly run the server
 
-# if __name__ == "__main__":  # Fix the string comparison
-#     import uvicorn
-#     uvicorn.run(app, host="0.0.0.0", port=8000)
+if __name__ == "__main__":  # Fix the string comparison
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
