@@ -50,7 +50,9 @@ async def create_order(order_request: OrderRequest):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
 
 @app.get("/test")
 async def test_endpoint():
@@ -58,6 +60,6 @@ async def test_endpoint():
 
 # Fix the main block to properly run the server
 
-if __name__ == "__main__":  # Fix the string comparison
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+# if __name__ == "__main__":  # Fix the string comparison
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
