@@ -1,22 +1,16 @@
-import requests
 from fastapi import FastAPI, HTTPException
 from alpaca.trading.client import TradingClient
 from alpaca.trading.requests import MarketOrderRequest
 from alpaca.trading.enums import OrderSide, TimeInForce
-from dotenv import load_dotenv
-import os
 from pydantic import BaseModel
-# Load environment variables
-
-load_dotenv()
+import os
 
 # Initialize FastAPI app
-
 app = FastAPI()
 
-# Configure Alpaca credentials
-alpaca_api = os.getenv("ALPACA_API_KEY")
-alpaca_secret = os.getenv("ALPACA_SECRET_KEY")
+# Configure Alpaca credentials - for Vercel, set these in the Vercel dashboard
+alpaca_api = os.environ.get("ALPACA_API_KEY")
+alpaca_secret = os.environ.get("ALPACA_SECRET_KEY")
 trading_client = TradingClient(alpaca_api, alpaca_secret, paper=True)
 
 # Pydantic model for order request
@@ -24,19 +18,15 @@ class OrderRequest(BaseModel):
     symbol: str
     quantity: int
 
-@app.get("/account")
+@app.get("/api/account")
 async def get_account():
+    try:
+        account = trading_client.get_account()
+        return account
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
-    url = "https://paper-api.alpaca.markets/v2/account"
-    headers = {
-        "accept": "application/json",
-        "APCA-API-KEY-ID": alpaca_api,
-        "APCA-API-SECRET-KEY": alpaca_secret
-    }
-    response = requests.get(url, headers=headers)
-    return response.json()
-
-@app.post("/order")
+@app.post("/api/order")
 async def create_order(order_request: OrderRequest):
     try:
         market_order_data = MarketOrderRequest(
@@ -50,7 +40,7 @@ async def create_order(order_request: OrderRequest):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@app.get("/")
+@app.get("/api")
 async def root():
     return {"message": "Hello World"}
 
