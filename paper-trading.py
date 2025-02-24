@@ -25,7 +25,6 @@ class OrderRequest(BaseModel):
     quantity: int
 
 @app.get("/account")
-
 async def get_account():
 
     url = "https://paper-api.alpaca.markets/v2/account"
@@ -46,18 +45,14 @@ async def create_order(order_request: OrderRequest):
             side=OrderSide.BUY,
             time_in_force=TimeInForce.DAY
         )
-
         market_order = trading_client.submit_order(order_data=market_order_data)
         return market_order
-
     except Exception as e:
-
         raise HTTPException(status_code=400, detail=str(e))
 
 
 
 @app.get("/test")
-
 async def test_endpoint():
     return {"message":"test"}
 
