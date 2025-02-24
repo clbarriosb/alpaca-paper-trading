@@ -8,6 +8,14 @@
   ],
   "routes": [
     {
+      "src": "/docs",
+      "dest": "paper-trading.py"
+    },
+    {
+      "src": "/openapi.json",
+      "dest": "paper-trading.py"
+    },
+    {
       "src": "/(.*)",
       "dest": "paper-trading.py"
     }
