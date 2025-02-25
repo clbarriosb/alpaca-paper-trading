@@ -61,14 +61,14 @@ async def receive_signal(signal_request: SignalRequest):
         # Handle buy signals
         if parsed_data["signal_type"] == "buyOrder":
             # Your buy order logic here
-            await create_order(parsed_data["symbol"])
-            return {"message": "Buy order processed", "data": parsed_data}
+            result = create_order(parsed_data["symbol"])
+            return {"message": "Buy order processed", "buy_result->": result}
         
         # Handle sell signals
         elif parsed_data["signal_type"] == "sellOrder":
             # Your sell order logic here
-            await create_sell_order(parsed_data["symbol"])
-            return {"message": "Sell order processed", "data": parsed_data}
+            result = create_sell_order(parsed_data["symbol"])
+            return {"message": "Sell order processed", "sell_result->": result}
             
         return {"message": "Signal received", "data": parsed_data}
     except Exception as e:
