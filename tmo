@@ -1,0 +1,72 @@
+//@version=6
+strategy(title="TMO Bull Strategy", shorttitle="TMO Bull", overlay=false, initial_capital=100000, pyramiding=0, default_qty_type=strategy.percent_of_equity, default_qty_value=100)
+
+// Inputs
+// Using defval=... to set default values, but no minval, maxval, or step.
+tmoLength    = input.int(defval=14,   title="TMO Length")
+signalLength = input.int(defval=5,    title="TMO Signal Smoothing")
+upperBand    = input.float(defval=20.0,  title="Overbought Threshold (+)")
+lowerBand    = input.float(defval=-20.0, title="Oversold Threshold (-)")
+
+// Block threshold for TMO (if above this, do not enter long)
+tmoBlock = input.float(defval=50.0, title="Max TMO for Long", tooltip="If TMO is above this value, skip long entries.")
+
+// Risk Management
+useStop   = input.bool(defval=true,  title="Use Stop Loss?")
+stopPerc  = input.float(defval=2.0,  title="Stop Loss %",  tooltip="Percentage-based stop from entry")
+useTP     = input.bool(defval=false, title="Use Take Profit?")
+tpPerc    = input.float(defval=4.0,  title="Take Profit %",tooltip="Percentage-based TP from entry")
+
+// TMO CALCULATION
+mf    = close - close[1]
+posMF = 0.0
+negMF = 0.0
+
+if mf > 0
+    posMF := mf
+    negMF := 0.0
+else if mf < 0
+    posMF := 0.0
+    negMF := -mf
+else
+    posMF := 0.0
+    negMF := 0.0
+
+posEMA = ta.ema(ta.ema(posMF, tmoLength), tmoLength)
+negEMA = ta.ema(ta.ema(negMF, tmoLength), tmoLength)
+tmoRaw = 0.0
+
+if (posEMA + negEMA) != 0
+    tmoRaw := 100 * (posEMA - negEMA) / (posEMA + negEMA)
+else
+    tmoRaw := 0.0
+
+tmoSignal = ta.ema(tmoRaw, signalLength)
+bullCross = ta.crossover(tmoRaw, tmoSignal)
+bearCross = ta.crossunder(tmoRaw, tmoSignal)
+
+// Only enter long if there's a bull cross AND TMO < tmoBlock
+if bullCross and (tmoRaw < tmoBlock)
+    strategy.entry("Long", strategy.long)
+    alert("TMO Bull Strategy: BUY Signal - TMO crossed above signal line", alert.freq_once_per_bar)
+
+// Exit long if TMO crosses below its signal
+if bearCross
+    strategy.close("Long", comment="BearCross Exit")
+    alert("TMO Bull Strategy: SELL Signal - TMO crossed below signal line", alert.freq_once_per_bar)
+    
+// RISK MANAGEMENT
+if useStop
+    stopLevelLong = strategy.position_avg_price * (1.0 - stopPerc / 100.0)
+    strategy.exit("Stop Loss", "Long", stop=stopLevelLong)
+
+if useTP
+    tpLevelLong = strategy.position_avg_price * (1.0 + tpPerc / 100.0)
+    strategy.exit("Take Profit", "Long", limit=tpLevelLong)
+
+// PLOTTING
+plot(tmoRaw,    color=color.new(color.blue, 0),   linewidth=2, title="TMO")
+plot(tmoSignal, color=color.new(color.orange, 0), linewidth=1, title="Signal")
+hline(0,          "Zero Line",       color=color.gray,  linestyle=hline.style_dotted)
+hline(upperBand,  "Overbought (+)",  color=color.red,   linestyle=hline.style_dashed)
+hline(lowerBand,  "Oversold (-)",    color=color.green, linestyle=hline.style_dashed)

@@ -37,12 +37,10 @@ async def get_account():
     response = requests.get(url, headers=headers)
     return response.json()
 
-@app.post("/order")
+@app.post("/buyOrder")
 async def create_order(order_request: OrderRequest):
     return {"orders":"order_request"}
     try:
-        print("order_request: ", order_request)
-        return {"orders":order_request}
         market_order_data = MarketOrderRequest(
             symbol=order_request.symbol,
             qty=order_request.quantity,
@@ -53,6 +51,22 @@ async def create_order(order_request: OrderRequest):
         return market_order
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/sellOrder")
+async def create_sell_order(order_request: OrderRequest):
+    try:
+        market_order_data = MarketOrderRequest(
+            symbol=order_request.symbol,
+            qty=order_request.quantity,
+            side=OrderSide.SELL,
+            time_in_force=TimeInForce.DAY
+        )
+        market_order = trading_client.submit_order(order_data=market_order_data)
+        return market_order
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 
 # @app.get("/")
 # async def root():
