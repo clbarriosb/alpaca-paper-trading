@@ -54,12 +54,13 @@ async def receive_signal(signal_request: SignalRequest):
         # Handle buy signals
         if parsed_data["signal_type"] == "buyOrder":
             # Your buy order logic here
-            create_order(parsed_data["symbol"])
+            await create_order(parsed_data["symbol"])
             return {"message": "Buy order processed", "data": parsed_data}
         
         # Handle sell signals
         elif parsed_data["signal_type"] == "sellOrder":
             # Your sell order logic here
+            await create_sell_order(parsed_data["symbol"])
             return {"message": "Sell order processed", "data": parsed_data}
             
         return {"message": "Signal received", "data": parsed_data}
@@ -94,11 +95,11 @@ async def create_order(symbol):
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/sellOrder")
-async def create_sell_order(order_request: OrderRequest):
+async def create_sell_order(symbol):
     try:
         market_order_data = MarketOrderRequest(
-            symbol=order_request.symbol,
-            qty=order_request.quantity,
+            symbol=symbol,
+            qty=quantity,
             side=OrderSide.SELL,
             time_in_force=TimeInForce.DAY
         )
@@ -121,6 +122,6 @@ async def test_endpoint():
 
 # Fix the main block to properly run the server
 
-if __name__ == "__main__":  # Fix the string comparison
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+# if __name__ == "__main__":  # Fix the string comparison
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
