@@ -52,9 +52,10 @@ class SignalRequest(BaseModel):
 
 @app.post("/signal")
 async def receive_signal(signal_request: SignalRequest):
-    logger.info(f"[{datetime.now()}] Received signal endpoint called with data: {parsed_data}")
+    
     try:
         parsed_data = signal_request.parse_signal()
+        logger.info(f"[{datetime.now()}] Received signal endpoint called with data: {parsed_data}")
         print(f"Received signal: {parsed_data}")
         
         # Handle buy signals
@@ -131,6 +132,6 @@ async def test_endpoint():
 
 # Fix the main block to properly run the server
 
-# if __name__ == "__main__":  # Fix the string comparison
-#     import uvicorn
-#     uvicorn.run(app, host="0.0.0.0", port=8000)
+if __name__ == "__main__":  # Fix the string comparison
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
