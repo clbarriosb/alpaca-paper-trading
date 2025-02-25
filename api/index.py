@@ -23,6 +23,8 @@ app = FastAPI(title="Alpaca Trading API")
 # Configure Alpaca credentials
 alpaca_api = os.getenv("ALPACA_API_KEY")
 alpaca_secret = os.getenv("ALPACA_SECRET_KEY")
+print("alpaca_api: ", alpaca_api)
+print("alpaca_secret: ", alpaca_secret)
 trading_client = TradingClient(alpaca_api, alpaca_secret, paper=True)
 quantity = os.getenv("QUANTITY")
 
@@ -38,14 +40,17 @@ class SignalRequest(BaseModel):
         
         # Extract symbol and price using regex or split
         symbol_match = re.search(r'symbol : (.+)', self.message)
+        quantity_match = re.search(r'quantity : (.+)', self.message)
         price_match = re.search(r'price : (.+)', self.message)
         
         symbol = symbol_match.group(1) if symbol_match else None
+        quantity = float(quantity_match.group(1)) if quantity_match else None
         price = float(price_match.group(1)) if price_match else None
         
         return {
             "signal_type": signal_type,
             "symbol": symbol,
+            "quantity": quantity,
             "price": price
         }
 
@@ -56,18 +61,21 @@ async def receive_signal(signal_request: SignalRequest):
     try:
         parsed_data = signal_request.parse_signal()
         logger.info(f"[{datetime.now()}] Received signal endpoint called with data: {parsed_data}")
-        print(f"Received signal: {parsed_data}")
         
         # Handle buy signals
         if parsed_data["signal_type"] == "buyOrder":
+            symbol = parsed_data["symbol"]
+            quantity = parsed_data["quantity"]
             # Your buy order logic here
-            result = create_order(parsed_data["symbol"])
+            result = await create_order(symbol,quantity)
             return {"message": "Buy order processed", "buy_result->": result}
         
         # Handle sell signals
         elif parsed_data["signal_type"] == "sellOrder":
             # Your sell order logic here
-            result = create_sell_order(parsed_data["symbol"])
+            symbol = parsed_data["symbol"]
+            quantity = parsed_data["quantity"]
+            result = await create_sell_order(symbol,quantity)
             return {"message": "Sell order processed", "sell_result->": result}
             
         return {"message": "Signal received", "data": parsed_data}
@@ -89,24 +97,25 @@ async def get_account():
     response = requests.get(url, headers=headers)
     return response.json()
 
-async def create_order(symbol):
+async def create_order(symbol,quantity):
     try:
-        logger.info(f"[{datetime.now()}] Creating buy order for symbol: {symbol}, quantity: {quantity}")
+        print("create_order2--------->occured",symbol)
         market_order_data = MarketOrderRequest(
             symbol=symbol,
             qty=quantity,
             side=OrderSide.BUY,
             time_in_force=TimeInForce.DAY
         )
+        print("market_order_data: ", market_order_data)
         market_order = trading_client.submit_order(order_data=market_order_data)
+        logging.info(f"[{datetime.now()}] Buy order created for symbol: {symbol}, quantity: {quantity}")
         return market_order
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/sellOrder")
-async def create_sell_order(symbol):
+async def create_sell_order(symbol , quantity):
     try:
-        logger.info(f"[{datetime.now()}] Creating sell order for symbol: {symbol}, quantity: {quantity}")
         market_order_data = MarketOrderRequest(
             symbol=symbol,
             qty=quantity,
@@ -118,20 +127,12 @@ async def create_sell_order(symbol):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-
-
-# @app.get("/")
-# async def root():
-#     print("root")
-#     return {"message": "Hello World"}
-
 @app.get("/test")
 async def test_endpoint():
     print("test")
     return {"message":"test url"}
 
 # Fix the main block to properly run the server
-
 if __name__ == "__main__":  # Fix the string comparison
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
