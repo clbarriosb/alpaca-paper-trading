@@ -23,6 +23,7 @@ trading_client = TradingClient(alpaca_api, alpaca_secret, paper=True)
 class OrderRequest(BaseModel):
     symbol: str
     quantity: int
+    
 
 @app.get("/account")
 async def get_account():
@@ -39,6 +40,8 @@ async def get_account():
 
 @app.post("/buyOrder")
 async def create_order(order_request: OrderRequest):
+    symbol = order_request.symbol
+    quantity = order_request.quantity
     return {"orders":"order_request"}
     try:
         market_order_data = MarketOrderRequest(

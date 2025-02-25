@@ -45,17 +45,20 @@ tmoSignal = ta.ema(tmoRaw, signalLength)
 bullCross = ta.crossover(tmoRaw, tmoSignal)
 bearCross = ta.crossunder(tmoRaw, tmoSignal)
 
-// Only enter long if there's a bull cross AND TMO < tmoBlock
+// Buy and Sell Signal conditions
 if bullCross and (tmoRaw < tmoBlock)
     strategy.entry("Long", strategy.long)
-    alert("TMO Bull Strategy: BUY Signal - TMO crossed above signal line", alert.freq_once_per_bar)
+    alert("TMO Bull Strategy: BUY Signal\nTMO: " + str.tostring(tmoRaw, "#.##") + 
+          "\nSignal: " + str.tostring(tmoSignal, "#.##") + 
+          "\nPrice: " + str.tostring(close), alert.freq_once_per_bar)
 
-// Exit long if TMO crosses below its signal
 if bearCross
     strategy.close("Long", comment="BearCross Exit")
-    alert("TMO Bull Strategy: SELL Signal - TMO crossed below signal line", alert.freq_once_per_bar)
-    
-// RISK MANAGEMENT
+    alert("TMO Bull Strategy: SELL Signal\nTMO: " + str.tostring(tmoRaw, "#.##") + 
+          "\nSignal: " + str.tostring(tmoSignal, "#.##") + 
+          "\nPrice: " + str.tostring(close), alert.freq_once_per_bar)
+
+// Risk Management
 if useStop
     stopLevelLong = strategy.position_avg_price * (1.0 - stopPerc / 100.0)
     strategy.exit("Stop Loss", "Long", stop=stopLevelLong)
