@@ -6,6 +6,7 @@ from alpaca.trading.enums import OrderSide, TimeInForce
 from dotenv import load_dotenv
 import os
 from pydantic import BaseModel
+import re
 # Load environment variables
 
 load_dotenv()
@@ -21,10 +22,50 @@ trading_client = TradingClient(alpaca_api, alpaca_secret, paper=True)
 quantity = os.getenv("QUANTITY")
 
 # Pydantic model for order request
-class OrderRequest(BaseModel):
-    symbol: str
-    quantity: float
-    
+class SignalRequest(BaseModel):
+    message: str
+
+    def parse_signal(self):
+        # Parse the message like "buySignal\nsymbol : CRYPTO10\nprice : 17697.7"
+        lines = self.message.split('\n')
+        
+        signal_type = lines[0]  # "buySignal" or "sellSignal"
+        
+        # Extract symbol and price using regex or split
+        symbol_match = re.search(r'symbol : (.+)', self.message)
+        price_match = re.search(r'price : (.+)', self.message)
+        
+        symbol = symbol_match.group(1) if symbol_match else None
+        price = float(price_match.group(1)) if price_match else None
+        
+        return {
+            "signal_type": signal_type,
+            "symbol": symbol,
+            "price": price
+        }
+
+
+@app.post("/signal")
+async def receive_signal(signal_request: SignalRequest):
+    try:
+        parsed_data = signal_request.parse_signal()
+        print(f"Received signal: {parsed_data}")
+        
+        # Handle buy signals
+        if parsed_data["signal_type"] == "buyOrder":
+            # Your buy order logic here
+            create_order(parsed_data["symbol"])
+            return {"message": "Buy order processed", "data": parsed_data}
+        
+        # Handle sell signals
+        elif parsed_data["signal_type"] == "sellOrder":
+            # Your sell order logic here
+            return {"message": "Sell order processed", "data": parsed_data}
+            
+        return {"message": "Signal received", "data": parsed_data}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 
 @app.get("/account")
 async def get_account():
@@ -39,10 +80,7 @@ async def get_account():
     response = requests.get(url, headers=headers)
     return response.json()
 
-@app.post("/buyOrder")
-async def create_order(order_request: OrderRequest):
-    print(order_request)
-    symbol = order_request.symbol
+async def create_order(symbol):
     try:
         market_order_data = MarketOrderRequest(
             symbol=symbol,
