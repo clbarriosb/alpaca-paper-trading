@@ -7,6 +7,11 @@ from dotenv import load_dotenv
 import os
 from pydantic import BaseModel
 import re
+import logging
+from datetime import datetime
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # Load environment variables
 
 load_dotenv()
@@ -47,6 +52,7 @@ class SignalRequest(BaseModel):
 
 @app.post("/signal")
 async def receive_signal(signal_request: SignalRequest):
+    logger.info(f"[{datetime.now()}] Received signal endpoint called with data: {parsed_data}")
     try:
         parsed_data = signal_request.parse_signal()
         print(f"Received signal: {parsed_data}")
@@ -70,6 +76,7 @@ async def receive_signal(signal_request: SignalRequest):
 
 @app.get("/account")
 async def get_account():
+    logger.info(f"[{datetime.now()}] Account endpoint called")
     print("alpaca_api: ", alpaca_api)
     print("alpaca_secret: ", alpaca_secret)
     url = "https://paper-api.alpaca.markets/v2/account"
@@ -83,6 +90,7 @@ async def get_account():
 
 async def create_order(symbol):
     try:
+        logger.info(f"[{datetime.now()}] Creating buy order for symbol: {symbol}, quantity: {quantity}")
         market_order_data = MarketOrderRequest(
             symbol=symbol,
             qty=quantity,
@@ -97,6 +105,7 @@ async def create_order(symbol):
 @app.post("/sellOrder")
 async def create_sell_order(symbol):
     try:
+        logger.info(f"[{datetime.now()}] Creating sell order for symbol: {symbol}, quantity: {quantity}")
         market_order_data = MarketOrderRequest(
             symbol=symbol,
             qty=quantity,
