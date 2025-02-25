@@ -22,7 +22,7 @@ trading_client = TradingClient(alpaca_api, alpaca_secret, paper=True)
 # Pydantic model for order request
 class OrderRequest(BaseModel):
     symbol: str
-    quantity: int
+    quantity: float
     
 
 @app.get("/account")
@@ -40,6 +40,7 @@ async def get_account():
 
 @app.post("/buyOrder")
 async def create_order(order_request: OrderRequest):
+    print(order_request)
     symbol = order_request.symbol
     quantity = order_request.quantity
     return {"orders":"order_request"}
@@ -83,6 +84,6 @@ async def test_endpoint():
 
 # Fix the main block to properly run the server
 
-# if __name__ == "__main__":  # Fix the string comparison
-#     import uvicorn
-#     uvicorn.run(app, host="0.0.0.0", port=8000)
+if __name__ == "__main__":  # Fix the string comparison
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
