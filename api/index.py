@@ -18,6 +18,7 @@ app = FastAPI(title="Alpaca Trading API")
 alpaca_api = os.getenv("ALPACA_API_KEY")
 alpaca_secret = os.getenv("ALPACA_SECRET_KEY")
 trading_client = TradingClient(alpaca_api, alpaca_secret, paper=True)
+quantity = os.getenv("QUANTITY")
 
 # Pydantic model for order request
 class OrderRequest(BaseModel):
@@ -42,12 +43,10 @@ async def get_account():
 async def create_order(order_request: OrderRequest):
     print(order_request)
     symbol = order_request.symbol
-    quantity = order_request.quantity
-    return {"orders":"order_request"}
     try:
         market_order_data = MarketOrderRequest(
-            symbol=order_request.symbol,
-            qty=order_request.quantity,
+            symbol=symbol,
+            qty=quantity,
             side=OrderSide.BUY,
             time_in_force=TimeInForce.DAY
         )
