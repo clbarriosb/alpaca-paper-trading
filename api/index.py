@@ -35,9 +35,10 @@ class SignalRequest(BaseModel):
     def parse_signal(self):
 
         print(self)
+        logger.info(f"[{datetime.now()}] Received signal endpoint called with sognal origin: {self}")
         # Parse the message like "buySignal\nsymbol : CRYPTO10\nprice : 17697.7"
         lines = self.message.split('\n')
-        print(lines)
+        logger.info(f"[{datetime.now()}] Received signal endpoint called with lines: {lines}")
         
         signal_type = lines[0]  # "buySignal" or "sellSignal"
         # Extract symbol and price using regex or split
