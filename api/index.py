@@ -33,11 +33,13 @@ class SignalRequest(BaseModel):
     message: str
 
     def parse_signal(self):
+
+        print(self)
         # Parse the message like "buySignal\nsymbol : CRYPTO10\nprice : 17697.7"
         lines = self.message.split('\n')
+        print(lines)
         
         signal_type = lines[0]  # "buySignal" or "sellSignal"
-        
         # Extract symbol and price using regex or split
         symbol_match = re.search(r'symbol : (.+)', self.message)
         quantity_match = re.search(r'quantity : (.+)', self.message)
