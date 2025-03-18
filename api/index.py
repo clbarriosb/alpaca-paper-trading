@@ -34,7 +34,6 @@ class SignalRequest(BaseModel):
 
     def parse_signal(self):
 
-        print(self)
         logger.info(f"[{datetime.now()}] Received signal endpoint called with sognal origin: {self}")
         # Parse the message like "buySignal\nsymbol : CRYPTO10\nprice : 17697.7"
         lines = self.message.split('\n')
